@@ -267,26 +267,27 @@ func download(url, filepath string, maxRetries int) logging.LogEntry {
 		}
 	}
 
-	file, err = os.Create(filepath)
-	if err != nil {
-		log.Fatal(err)
-		return logRow
-	}
-	defer func() {
-		if err = file.Close(); err != nil {
-			fmt.Printf("unable to close file: %v", err)
+	if (response.StatusCode == 200)  {
+		file, err = os.Create(filepath)
+		if err != nil {
+			log.Fatal(err)
+			return logRow
 		}
-	}()
+		defer func() {
+			if err = file.Close(); err != nil {
+				fmt.Printf("unable to close file: %v", err)
+			}
+		}()
 
-	nBytes, err := io.Copy(file, response.Body)
-	if err != nil {
-		log.Fatal(err)
-		return logRow
+		nBytes, err := io.Copy(file, response.Body)
+		if err != nil {
+			log.Fatal(err)
+			return logRow
+		}
+		logRow.Result = true
+		logRow.NBytes = uint64(nBytes)
 	}
-
-	logRow.Result = true
-	logRow.NBytes = uint64(nBytes)
-
+	
 	return logRow
 }
 
